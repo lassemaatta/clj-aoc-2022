@@ -25,10 +25,17 @@
     (map line->pair-ranges)
     (filter pairs-contain?)))
 
+(defn- counting
+  "Return a reducing function which counts the number of items"
+  ([] 0)
+  ([result] result)
+  ([^long result _]
+   (inc result)))
+
 (defn first-problem
   "Count the number of assignment pairs where one contains the other"
   [input]
-  (count (sequence containing-assignments-xform input)))
+  (transduce containing-assignments-xform counting input))
 
 (defn- range-overlaps?
   [[[^long a ^long b] [^long c ^long d]]]
@@ -44,4 +51,4 @@
 (defn second-problem
   "Count the number of assignment pairs that overlap at least partially"
   [input]
-  (count (sequence overlapping-assignments-xform input)))
+  (transduce overlapping-assignments-xform counting input))

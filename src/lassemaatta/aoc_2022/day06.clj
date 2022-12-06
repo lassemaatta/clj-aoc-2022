@@ -14,7 +14,7 @@
 
 (defn- sliding-window
   "Returns a stateful transducer, which applies a sliding window of size `n` over the input.
-  Starting index of the window is stored in the metadata under `:index`."
+  Starting index of the window is stored in the metadata under `:window-index`."
   [^long n]
   (fn [xf]
     (let [*index  (volatile! 0)
@@ -27,32 +27,36 @@
          (let [index  (vswap! *index (fn [^long idx] (inc idx)))
                window (vswap! *window push-queue n input)]
            (if (= n (count window))
-             (xf result (with-meta (vec window) {:index index}))
+             (xf result (with-meta (vec window) {:window-index index}))
              result)))))))
 
-(defn unique?
+(defn- window->index
+  [window]
+  (-> window meta :window-index))
+
+(defn- unique?
   [window]
   (= (count window)
      (count (set window))))
 
-(defn find-first-unique-pattern
+(defn- find-unique-pattern-indexes
   [n]
   (comp
     (sliding-window n)
     (filter unique?)
-    (take 1)
-    (map (comp :index meta))))
+    (map window->index)))
 
-(defn first-value
-  ([] 0)
+(defn- first-value
+  "Returns a reducing function, which returns the first value"
+  ([] nil)
   ([result] result)
-  ([_ value] value))
+  ([_ value] (reduced value)))
 
 (defn first-problem
   "Find the first unique substring of length 4"
   [input]
   (-> (transduce
-        (find-first-unique-pattern 4)
+        (find-unique-pattern-indexes 4)
         first-value
         (first input))))
 
@@ -60,6 +64,6 @@
   "Find the first unique substring of length 14"
   [input]
   (-> (transduce
-        (find-first-unique-pattern 14)
+        (find-unique-pattern-indexes 14)
         first-value
         (first input))))
