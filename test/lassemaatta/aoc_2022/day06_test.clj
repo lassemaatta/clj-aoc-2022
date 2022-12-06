@@ -3,7 +3,7 @@
             [lassemaatta.aoc-2022.day06 :as day06]
             [lassemaatta.aoc-2022.util :as util]))
 
-(deftest day05-test
+(deftest day06-test
   (are [problem filename result] (= result (-> filename util/read-file problem))
     day06/first-problem  "day06/small-sample-0.txt" 7
     day06/first-problem  "day06/small-sample-1.txt" 5
